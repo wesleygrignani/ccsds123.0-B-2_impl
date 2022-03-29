@@ -6,7 +6,6 @@
 ---------------------------------------------------------------------------------------
 -- Description: This block is going to perform the local sum in a column oriented form
 -- Local sum is equal to: 4*neighboor
--- teste
 ---------------------------------------------------------------------------------------
 
 library IEEE;
