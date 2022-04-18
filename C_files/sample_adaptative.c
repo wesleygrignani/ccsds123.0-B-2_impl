@@ -55,20 +55,6 @@ int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t
 		*bits_written += DYNAMIC_RANGE;
 	}else{ // for t > 0
 
-		 //if ((2*counter[z]) > (accumulator[z]+ ((counter[z]*49)>>7))){
-		 //	 k_z = 0;
-		 //}else{
-		 //	 int aux = 0;
-		 //	 int din = DYNAMIC_RANGE;
-		 //	 while(aux == 0){
-		 //		 k_z = din - 2;
-		 //		 if(counter[z]*(1<<k_z) <= (accumulator[z]+ ((counter[z]*49)>>7))){
-		 //			 aux = 1;
-		 //		 }else{
-		 //			 din--;
-		 //		 }
-		 //	 }
-		 //}
 		int k_z = (int) mlog2((accumulator[z] + (49 * counter[z] >> 7)) / (double) counter[z]);
 
 		if((2 * counter[z]) > (accumulator[z] + ((49/(pow(2,7))*counter[z])))){
@@ -105,14 +91,6 @@ int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t
             accumulator[z] = (accumulator[z] + mapped + 1) >> 1;
             counter[z] = (counter[z] +1) >> 1;
         }
-
-		//if(counter[z] < limit){
-		//	accumulator[z] += mapped;
-		//	counter[z] ++;
-		//}else if(counter[z] == limit){
-		//	accumulator[z] = (accumulator[z] + mapped + 1) >> 1;
-		//	counter[z] = (counter[z] + 1) >> 1;
-		//}
 	}
 
 	return 1;
