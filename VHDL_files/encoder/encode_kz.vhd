@@ -19,25 +19,28 @@ use work.ccsds123_B2_package.all;
 
 
 entity encode_kz is
-  port (--i_clk      : in  std_logic;                                -- clock signal
+  port (i_clk      : in  std_logic;
+        i_enable   : in  std_logic;
         i_stage    : in  std_logic_vector(1 downto 0);             -- stage selected from fsm
-        i_kz_value : in  std_logic_vector(KZ_SIZE-1 downto 0);     -- kz value from fsm and used in Stage 3 
+        i_kz_index : in  std_logic_vector(KZ_SIZE-1 downto 0);     -- kz value used in Stage 3
         i_mapped   : in  std_logic_vector(SAMPLE_SIZE-1 downto 0); -- mapped sample value 
         o_outbit   : out std_logic);                               -- output encoded bit
 end encode_kz;
 
 architecture Behavioral of encode_kz is
 
-signal w_kz_value : integer := 0;
 signal w_outbit : std_logic := '0';
 begin
-
-  w_kz_value <= to_integer(signed (i_kz_value));
   
-  w_outbit <= i_mapped(w_kz_value);
-  
-  o_outbit <= '0' when i_stage = "00" else 
+  w_outbit <= '0' when i_stage = "00" else 
               '1' when i_stage = "01" else
-               w_outbit when i_stage = "10" else '0';
+               i_mapped(to_integer(unsigned(i_kz_index))) when i_stage = "10" else '0';
                
+  process(i_clk, i_enable)
+  begin 
+    if(rising_edge(i_clk) and i_enable = '1') then 
+      o_outbit <= w_outbit;
+    end if;
+  end process;
+  
 end Behavioral;

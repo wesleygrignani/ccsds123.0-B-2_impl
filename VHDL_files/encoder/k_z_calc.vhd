@@ -24,10 +24,11 @@ begin
   
   w_counter <= to_integer(signed(i_counter));
   w_accumulator <= to_integer(signed(i_accumulator));
-  w_kz <= (w_accumulator + 49 * (w_counter/7)) /  (w_counter);
+  --w_kz <= (w_accumulator + 49 * (w_counter/7)) /  (w_counter);
   
-  process(i_clk, i_enable)
+  process(i_clk, i_enable, w_accumulator, w_counter)
   begin
+    w_kz <= (w_accumulator + 49 * (w_counter/7)) /  (w_counter);
     if(rising_edge(i_clk) and i_enable = '1') then
       if(w_counter*2 > (w_accumulator + ((49/2**7) * w_counter))) then 
         w_kz <= 0;
@@ -38,4 +39,7 @@ begin
       end if;
     end if;
   end process;
+  
+  o_kz <= std_logic_vector(to_unsigned (w_kz, KZ_SIZE));
+   
 end Behavioral;

@@ -16,17 +16,29 @@ library work;
 use work.ccsds123_B2_package.all;
 
 entity encode_umax is
-  Port (i_stage   : in  std_logic;                                 -- stage selected by fsm
+  Port (i_clk     : in  std_logic;
+        i_enable  : in  std_logic;
+        i_stage   : in  std_logic;                                 -- stage selected by fsm
         i_mapped  : in  std_logic_vector(SAMPLE_SIZE-1 downto 0);  -- mapped value from predictor
-        i_counter : integer range 0 to D;                          -- counter used by fsm to indicate the bit position of mapped on stage 2 
+        i_d_index : in  integer range 0 to D-1;                    -- counter used by fsm to indicate the bit position of mapped on stage 2 
         o_outbit  : out std_logic);                                -- out encoded bit
 end encode_umax;
 
 architecture Behavioral of encode_umax is
 
+signal w_outbit : std_logic := '0';
+
 begin
 
-  o_outbit <= '0' when i_stage = '0' else 
-              i_mapped(i_counter) when i_stage = '1' else '0';  
+  w_outbit <= '0' when i_stage = '0' else 
+              i_mapped(i_d_index) when i_stage = '1' else '0';  
 
+  process(i_clk, i_enable)
+  begin
+    if(rising_edge(i_clk) and i_enable = '1') then
+      o_outbit <= w_outbit;
+    end if;
+  end process;
+  
+  
 end Behavioral;

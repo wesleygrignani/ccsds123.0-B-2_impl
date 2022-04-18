@@ -14,7 +14,6 @@ entity coding_procedure is
         i_mapped : in  std_logic_vector(SAMPLE_SIZE-1 downto 0); -- mapped value from predictor
         i_kz     : in  std_logic_vector(KZ_SIZE-1 downto 0);     -- kz value calculated in the previous block
         o_select : out std_logic;                                -- output for fsm knows what path use for encode mapped sample 
-        o_kz     : out std_logic_vector(KZ_SIZE-1 downto 0);     -- kz value calculate in previous block and used after in encode part
         o_uz     : out std_logic_vector(KZ_SIZE-1 downto 0));    -- uz value calculate in this block and used after in encode part
 end coding_procedure;
 
@@ -24,11 +23,11 @@ signal w_uz, w_kz, w_mapped : integer := 0;
 signal w_select : std_logic := '0';
 begin
 
-  w_mapped <= to_integer(signed (i_mapped));
-  w_kz <= to_integer(signed (i_kz));
+  w_mapped <= to_integer(unsigned (i_mapped));
+  w_kz <= to_integer(unsigned (i_kz));
   w_uz <= (w_mapped / w_kz);
   
-  process(i_clk, i_enable)
+  process(i_clk, i_enable, w_uz)
   begin
     if(rising_edge(i_clk) and i_enable = '1') then 
       if(w_uz < UMAX) then
@@ -42,9 +41,8 @@ begin
   end process;
   
   -- these outputs will be returned to fsm 
-  o_select <= w_select;
-  o_uz <= std_logic_vector(to_signed(w_uz, KZ_SIZE));
-  o_kz <= std_logic_vector(to_signed(w_kz, KZ_SIZE));
+  o_select <= std_logic(w_select);
+  o_uz <= std_logic_vector(to_unsigned(w_uz, KZ_SIZE));
   
   
 end Behavioral;
