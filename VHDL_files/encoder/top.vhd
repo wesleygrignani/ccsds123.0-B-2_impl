@@ -28,6 +28,9 @@ component control_block is
          i_select_coding         : in  std_logic;  -- selecionar qual caminho de codificação ira fazer
          i_kz_equal_zero         : in  std_logic;
          i_uz_equal_zero         : in  std_logic;
+         o_sel_mux_acc           : out std_logic; 
+         o_sel_mux_count         : out std_logic; 
+         o_en_init_mem           : out std_logic; 
          o_en_coding_kz          : out std_logic;
          o_en_coding_umax        : out std_logic;
          o_enable_kzcalc         : out std_logic;  
@@ -50,6 +53,9 @@ end component;
 
 component datapath is
   port (i_clk                   : in  std_logic;
+        i_sel_mux_acc           : in  std_logic;
+        i_sel_mux_count         : in  std_logic;
+        i_en_init_mem           : in  std_logic;
         i_en_kzcalc             : in  std_logic;
         i_en_coding_procedure   : in  std_logic;
         i_en_acc_counter_update : in  std_logic;
@@ -91,6 +97,10 @@ signal w_en_verify_t : std_logic := '0';
 signal w_stage_kz : std_logic_vector(1 downto 0) := (others => '0');
 -- stage umax
 signal w_stage_umax : std_logic := '0';
+-- seletor dos multiplexadores
+signal w_sel_mux_acc, w_sel_mux_count : std_logic := '0';
+-- enable da inicialização das memorias
+signal w_en_init_mem : std_logic := '0';
 
 begin
 
@@ -102,6 +112,9 @@ begin
              i_select_coding => w_select_coding,
              i_kz_equal_zero => w_kz_equal_zero,
              i_uz_equal_zero => w_uz_equal_zero,
+             o_sel_mux_acc  => w_sel_mux_acc, 
+             o_sel_mux_count => w_sel_mux_count,
+             o_en_init_mem => w_en_init_mem,
              o_en_coding_kz => w_en_coding_kz,
              o_en_coding_umax => w_en_coding_umax,
              o_enable_kzcalc => w_en_kzcalc,  
@@ -125,6 +138,9 @@ begin
              
   u_datapath : datapath
   port map ( i_clk => i_clk,
+             i_sel_mux_acc => w_sel_mux_acc,
+             i_sel_mux_count => w_sel_mux_count,
+             i_en_init_mem => w_en_init_mem,
              i_en_kzcalc => w_en_kzcalc,
              i_en_coding_procedure  => w_en_codingprocedure,
              i_en_acc_counter_update => w_en_acc_counter_update,

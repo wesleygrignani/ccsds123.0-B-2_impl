@@ -24,19 +24,26 @@ begin
   
   w_counter <= to_integer(signed(i_counter));
   w_accumulator <= to_integer(signed(i_accumulator));
-  --w_kz <= (w_accumulator + 49 * (w_counter/7)) /  (w_counter);
   
   process(i_clk, i_enable, w_accumulator, w_counter)
   begin
-    w_kz <= (w_accumulator + 49 * (w_counter/7)) /  (w_counter);
+    
     if(rising_edge(i_clk) and i_enable = '1') then
+      
+      if(w_counter = 0) then 
+        w_kz <= (w_accumulator + (49 * (w_counter/7))) / 1;
+      else
+        w_kz <= (w_accumulator + (49 * (w_counter/7))) / (w_counter);
+      end if;   
+        
       if(w_counter*2 > (w_accumulator + ((49/2**7) * w_counter))) then 
-        w_kz <= 0;
+        w_kz <= 5;
       elsif(w_kz > D - 2) then 
         w_kz <= D - 2;
       else
-        w_kz <= 0;
+        w_kz <= 5;
       end if;
+    
     end if;
   end process;
   

@@ -12,6 +12,9 @@ use work.ccsds123_B2_package.all;
 
 entity datapath is
   port (i_clk                   : in  std_logic;
+        i_sel_mux_acc           : in  std_logic;
+        i_sel_mux_count         : in  std_logic;
+        i_en_init_mem           : in  std_logic;
         i_en_kzcalc             : in  std_logic;
         i_en_coding_procedure   : in  std_logic;
         i_en_acc_counter_update : in  std_logic;
@@ -136,9 +139,30 @@ component verify_t is
          o_output : out std_logic);
 end component;
 
+component init_counter_accumulator is
+  port (i_clk         : in  std_logic;
+        i_enable      : in  std_logic;
+        o_accumulator : out std_logic_vector(ACC_SIZE-1 downto 0);
+        o_counter     : out std_logic_vector(COUNT_SIZE-1 downto 0));
+end component;
+
+component mux_accumulator_mem is
+  port (i_accumulator_from_init   : in  std_logic_vector(COUNT_SIZE-1 downto 0);
+        i_accumulator_from_update : in  std_logic_vector(COUNT_SIZE-1 downto 0); 
+        i_sel                 : in  std_logic;
+        o_accumulator_out         : out std_logic_vector(COUNT_SIZE-1 downto 0));
+end component;
+
+component mux_counter_mem is
+  port (i_counter_from_init   : in  std_logic_vector(COUNT_SIZE-1 downto 0);
+        i_counter_from_update : in  std_logic_vector(COUNT_SIZE-1 downto 0); 
+        i_sel                 : in  std_logic;
+        o_counter_out         : out std_logic_vector(COUNT_SIZE-1 downto 0));
+end component;
+
 signal w_kz, w_uz : std_logic_vector(KZ_SIZE-1 downto 0) := (others => '0');
-signal w_counter_mem_in, w_counter_mem_out : std_logic_vector(COUNT_SIZE-1 downto 0) := (others => '0');
-signal w_accumulator_mem_in, w_accumulator_mem_out : std_logic_vector(ACC_SIZE-1 downto 0) := (others => '0');
+signal w_counter_mem_in, w_counter_mem_out, w_init_mem_count, w_count_in_memory : std_logic_vector(COUNT_SIZE-1 downto 0) := (others => '0');
+signal w_accumulator_mem_in, w_accumulator_mem_out, w_init_mem_acc, w_acc_in_memory : std_logic_vector(ACC_SIZE-1 downto 0) := (others => '0');
 signal w_kz_register, w_uz_register : std_logic_vector(KZ_SIZE-1 downto 0);
 
 begin
@@ -180,7 +204,7 @@ begin
               i_rd => i_rd_accumulator,
               i_wr => i_wr_accumulator,
               i_addr => i_addr_mem,
-              i_din => w_accumulator_mem_out,
+              i_din => w_acc_in_memory,
               o_dout => w_accumulator_mem_in);
   
   u_counter_mem_block : counter_mem
@@ -188,7 +212,7 @@ begin
               i_rd => i_rd_counter,
               i_wr => i_wr_counter,
               i_addr => i_addr_mem,
-              i_din => w_counter_mem_out,
+              i_din => w_count_in_memory,
               o_dout => w_counter_mem_in);
 
   u_update_block : acc_counter_update
@@ -233,5 +257,23 @@ begin
               i_enable => i_en_verify_t,
               i_t      => i_t,
               o_output => o_verify_t);
+              
+  u_init_mem : init_counter_accumulator 
+  port map (i_clk => i_clk,
+            i_enable => i_en_init_mem,
+            o_accumulator => w_init_mem_acc,
+            o_counter => w_init_mem_count);
+            
+  u_mux_acc : mux_accumulator_mem 
+  port map (i_accumulator_from_init  => w_init_mem_acc,
+            i_accumulator_from_update => w_accumulator_mem_out,
+            i_sel => i_sel_mux_acc,
+            o_accumulator_out  => w_acc_in_memory);
+            
+  u_mux_count : mux_counter_mem 
+  port map (i_counter_from_init   => w_init_mem_count,
+            i_counter_from_update => w_counter_mem_out,
+            i_sel                 => i_sel_mux_count,
+            o_counter_out         => w_count_in_memory);
 
 end Behavioral;

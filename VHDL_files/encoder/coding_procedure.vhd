@@ -25,8 +25,18 @@ begin
 
   w_mapped <= to_integer(unsigned (i_mapped));
   w_kz <= to_integer(unsigned (i_kz));
-  w_uz <= (w_mapped / w_kz);
   
+  -- calculo do uz 
+  process(w_kz)
+  begin
+    if (w_kz = 0) then
+      w_uz <= w_mapped;  
+    else
+      w_uz <= w_mapped/w_kz;
+    end if;
+  end process;
+  
+  -- verificação do caminho de codificação com base no uz
   process(i_clk, i_enable, w_uz)
   begin
     if(rising_edge(i_clk) and i_enable = '1') then 
