@@ -15,7 +15,7 @@
 #define BANDS 5
 
 // Unary length limit shall be an integer in the range 8 to 32
-#define UMAX 8
+#define UMAX 16
 
 // Initial count exponent shall be an integer in the range 1 to 8
 #define INI_COUNT_EXP 1
@@ -24,10 +24,10 @@
 #define DYNAMIC_RANGE 16
 
 // Rescaling counter size parameter
-#define RESCALING_COUNTER_SIZE 4
+#define RESCALING_COUNTER_SIZE 6
 
 // Accumulator initialization constant
-#define ACCUMULATOR_INIT 7
+#define ACCUMULATOR_INIT 5
 
 //
 #define M 3
@@ -39,10 +39,10 @@
 
 
 void write_bits(int data, int size);
-int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t t, uint16_t z, uint16_t mapped, uint16_t *bits_written);
+int encode_sample(int counter[BANDS], int accumulator[BANDS], int t, int z, int mapped, int *bits_written);
 void write_bits_mapped(int data, int size);
 void write_bits_mapped2(int data, int size);
-void write_headers(uint16_t *bits_written);
+void write_headers(int *bits_written);
 unsigned int mlog2( unsigned int x );
 
 #endif //SAMPLE_ADAPTATIVE_H
