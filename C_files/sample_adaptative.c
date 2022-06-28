@@ -46,7 +46,7 @@ void write_bits_mapped2(int data, int size){
 }
 
 
-int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t t, uint16_t z, uint16_t mapped, uint16_t *bits_written){
+int encode_sample(int counter[BANDS], int accumulator[BANDS], int t, int z, int mapped, int *bits_written){
 #pragma HLS PIPELINE off
 
 	// The first mapped prediction residual in each spectral band shall be uncoded, remember that:(t = x + y * NCOLS)
@@ -55,39 +55,36 @@ int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t
 		*bits_written += DYNAMIC_RANGE;
 	}else{ // for t > 0
 
-		int k_z = (int) mlog2((accumulator[z] + (49 * counter[z] >> 7)) / (double) counter[z]);
+		int k_z = mlog2((accumulator[z] + ((49 * counter[z]) >> 7)) / counter[z]);
 
-		if((2 * counter[z]) > (accumulator[z] + ((49/(pow(2,7))*counter[z])))){
-			k_z = 0;
-		}else if(k_z > DYNAMIC_RANGE - 2){
-			k_z = DYNAMIC_RANGE - 2;
-		}
+		k_z = k_z < 0 ? 0 : k_z;
+		k_z = k_z > DYNAMIC_RANGE-2 ? DYNAMIC_RANGE-2 : k_z;
 
-		unsigned int u_z = (mapped >> k_z);
+		int u_z = (mapped >> k_z);
 
 		// Coding procedure
 		if(u_z < UMAX){ // then Rk consists of u_z 'zeros', followed by a 'one' and by the k least sig bits of the mapped
-			//printf("u_z < UMAX");
+			//printf("\nu_z < UMAX: %d,%d\n", u_z, k_z);
 			write_bits(0, u_z);
 			write_bits(1, 1);
 			write_bits_mapped2(mapped, k_z);
+			//printf("\n");
 			*bits_written += u_z + 1 + k_z;
 		}else{ // otherwise Rk consists of UMAX 'zeros' followed by D-bit binary representation of mappped
-			//printf("else");
+			//printf("\nelse %d\n", k_z);
 			write_bits(0, UMAX);
 			write_bits_mapped2(mapped, DYNAMIC_RANGE);
+			//printf("\n");
 			*bits_written += UMAX + DYNAMIC_RANGE;
 		}
 
 		// Accumulator and counter update
-		//int limit = pow(2, RESCALING_COUNTER_SIZE) - 1;
-
         int limit = (1 << RESCALING_COUNTER_SIZE) - 1;
         if (counter[z] < limit) {
             accumulator[z] += mapped;
             counter[z]++;
 
-        } else {
+        } else {//if (counter[z] == limit) {
             accumulator[z] = (accumulator[z] + mapped + 1) >> 1;
             counter[z] = (counter[z] +1) >> 1;
         }
@@ -97,7 +94,7 @@ int encode_sample(uint16_t counter[BANDS], uint16_t accumulator[BANDS], uint16_t
 }
 
 
-void write_headers(uint16_t *bits_written){
+void write_headers(int *bits_written){
     /************************************************ WRITE HEADER ****************************************************/
     /*************************************** IMAGE METADATA ********************************/
     const __uint8_t ud_data = 0;
