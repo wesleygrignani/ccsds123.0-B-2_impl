@@ -133,10 +133,10 @@ const int MAPPED_RES[125] = {
 
 int main(){
 
-	uint16_t counter[BANDS] = {0x0};
-	uint16_t accumulator[BANDS] = {0x0};
-	uint16_t bits_written = 0;
-	uint16_t x = 0, y = 0, t = 0, z = 0;
+	int counter[BANDS] = {0x0};
+	int accumulator[BANDS] = {0x0};
+	int bits_written = 0;
+	int x = 0, y = 0, t = 0, z = 0;
 
 	// initializing counter and accumulator
 	for(z = 0; z < BANDS; z++){
